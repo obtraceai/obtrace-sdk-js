@@ -150,5 +150,4 @@ Replay is event-based DOM reconstruction (not video).
 Manual queries are documented in `docs/clickhouse-validation.md`.
 
 ## References
-- `specs/sdk/universal-contract-v1.md`
 - `docs/requirements-sdk-js-v1.md`
