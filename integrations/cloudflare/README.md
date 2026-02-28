@@ -1,6 +1,6 @@
-# Obtrace SDK Integration for Cloudflare
+# Obtrace SDK Integration for Cloudflare Workers
 
-## 1) Environment Variables
+## Environment Variables
 
 Set as Cloudflare Worker secrets/vars:
 - `OBTRACE_API_KEY`
@@ -9,19 +9,7 @@ Set as Cloudflare Worker secrets/vars:
 - `OBTRACE_PROJECT_ID`
 - `OBTRACE_ENV`
 
-For frontend apps hosted on Pages:
-- `VITE_OBTRACE_API_KEY`
-- `VITE_OBTRACE_INGEST_BASE_URL`
-- `VITE_OBTRACE_TENANT_ID`
-- `VITE_OBTRACE_PROJECT_ID`
-
-Notes:
-- Cloudflare Workers use bindings (`vars` and secrets), not `.env` at runtime.
-- References:
-  - `https://developers.cloudflare.com/workers/configuration/environment-variables/`
-  - `https://developers.cloudflare.com/workers/configuration/secrets/`
-
-## 2) Worker Example
+## Worker Example
 
 ```ts
 import { ObtraceClient } from "@obtrace/sdk-js";
@@ -43,9 +31,3 @@ export default {
   }
 };
 ```
-
-## 3) Production Hardening
-
-1. Keep server key only in Worker secret store.
-2. Bind different keys by environment (`preview`, `production`).
-3. Validate ingest connectivity from edge regions.

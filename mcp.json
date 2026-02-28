@@ -1,22 +1,17 @@
 {
   "mcp_version": "1.0",
   "name": "obtrace-sdk-js",
-  "description": "MCP context metadata for Obtrace JS SDK repository",
+  "description": "MCP context metadata for Obtrace backend JS SDK repository",
   "resources": [
     {
       "id": "readme",
       "path": "README.md",
-      "description": "Primary getting started and package usage"
+      "description": "Primary backend SDK usage"
     },
     {
       "id": "docs-index",
       "path": "docs/index.md",
       "description": "Documentation index"
-    },
-    {
-      "id": "contract",
-      "path": "../../specs/sdk/universal-contract-v1.md",
-      "description": "Cross-SDK contract"
     }
   ],
   "conventions": {

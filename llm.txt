@@ -1,11 +1,12 @@
-Obtrace SDK JS
+Obtrace SDK JS (Backend)
 
 Purpose:
-- Browser and Node/Bun SDK for telemetry, replay, context propagation, and ingest transport.
+- Backend JS SDK for telemetry, context propagation, and ingest transport.
+- Runtime targets: Node.js and Bun.
 
 Key entrypoints:
-- @obtrace/sdk-js/browser -> initBrowserSDK
 - @obtrace/sdk-js/node -> initNodeSDK
+- @obtrace/sdk-js -> ObtraceClient + backend wrappers
 
 Ingest endpoints:
 - POST /otlp/v1/logs
@@ -19,10 +20,5 @@ Design constraints:
 - Business logic is server-side (ingest/control-plane/backend).
 
 Core capabilities:
-- Browser: errors, vitals, fetch instrumentation, replay by DOM reconstruction.
 - Node/Bun: logs/metrics/spans, fetch instrumentation, unhandled error hooks.
-- Wrappers: React, Next, Vue, Angular, Svelte, Express, Fastify, Hono, Nest, Next route handlers.
-
-Reference:
-- specs/sdk/universal-contract-v1.md
-- docs/requirements-sdk-js-v1.md
+- Wrappers: Express, Fastify, Hono, Elysia, Nest, Next route handlers.

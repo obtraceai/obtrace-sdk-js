@@ -1,7 +1,7 @@
 {
   "name": "@obtrace/sdk-js",
   "version": "1.0.0",
-  "description": "Obtrace JavaScript SDK for browser, Node.js and Bun",
+  "description": "Obtrace backend JavaScript SDK for Node.js and Bun",
   "type": "module",
   "license": "UNLICENSED",
   "main": "./dist/index.js",
@@ -11,10 +11,6 @@
     ".": {
       "types": "./dist/types/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./browser": {
-      "types": "./dist/types/browser_entry.d.ts",
-      "import": "./dist/browser_entry.js"
     },
     "./node": {
       "types": "./dist/types/node_entry.d.ts",
