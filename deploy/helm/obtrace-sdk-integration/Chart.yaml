@@ -1,6 +1,0 @@
-apiVersion: v2
-name: obtrace-sdk-integration
-description: Helm chart for Obtrace SDK integration settings in Kubernetes workloads
-type: application
-version: 0.1.0
-appVersion: "1.0.0"
