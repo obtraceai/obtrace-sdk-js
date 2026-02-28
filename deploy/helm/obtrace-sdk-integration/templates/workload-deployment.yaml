@@ -1,0 +1,57 @@
+{{- if and .Values.workload.enabled (eq .Values.workload.kind "Deployment") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.workload.name }}
+  labels:
+    {{- include "obtrace-sdk-integration.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.workload.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Values.workload.name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Values.workload.name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: app
+          image: {{ .Values.workload.image | quote }}
+          imagePullPolicy: {{ .Values.workload.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.workload.containerPort }}
+          env:
+            - name: OBTRACE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secret.name }}
+                  key: OBTRACE_API_KEY
+            - name: OBTRACE_INGEST_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.config.name }}
+                  key: OBTRACE_INGEST_BASE_URL
+            - name: OBTRACE_TENANT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.config.name }}
+                  key: OBTRACE_TENANT_ID
+            - name: OBTRACE_PROJECT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.config.name }}
+                  key: OBTRACE_PROJECT_ID
+            - name: OBTRACE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.config.name }}
+                  key: OBTRACE_ENV
+            {{- with .Values.workload.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.workload.resources | nindent 12 }}
+{{- end }}

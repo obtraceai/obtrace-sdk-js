@@ -1,0 +1,39 @@
+{
+  "name": "@obtrace/sdk-js",
+  "version": "1.0.0",
+  "description": "Obtrace JavaScript SDK for browser, Node.js and Bun",
+  "type": "module",
+  "license": "UNLICENSED",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./browser": {
+      "types": "./dist/types/browser_entry.d.ts",
+      "import": "./dist/browser_entry.js"
+    },
+    "./node": {
+      "types": "./dist/types/node_entry.d.ts",
+      "import": "./dist/node_entry.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.7.3"
+  }
+}

@@ -1,0 +1,13 @@
+{{- if .Values.config.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.config.name }}
+  labels:
+    {{- include "obtrace-sdk-integration.labels" . | nindent 4 }}
+data:
+  OBTRACE_INGEST_BASE_URL: {{ .Values.config.ingestBaseUrl | quote }}
+  OBTRACE_TENANT_ID: {{ .Values.config.tenantId | quote }}
+  OBTRACE_PROJECT_ID: {{ .Values.config.projectId | quote }}
+  OBTRACE_ENV: {{ .Values.config.env | quote }}
+{{- end }}
