@@ -11,7 +11,7 @@ Defina no serviço:
 
 Exemplo:
 - `OBTRACE_API_KEY=devkey`
-- `OBTRACE_INGEST_BASE_URL=https://injet.obtrace.ai`
+- `OBTRACE_INGEST_BASE_URL=https://inject.obtrace.ai`
 - `OBTRACE_TENANT_ID=tenant-dev`
 - `OBTRACE_PROJECT_ID=project-dev`
 - `OBTRACE_ENV=production`

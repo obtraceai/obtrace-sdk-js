@@ -2,7 +2,7 @@ import { initNodeSDK } from "../../src/node/index";
 
 const sdk = initNodeSDK({
   apiKey: "devkey",
-  ingestBaseUrl: "https://injet.obtrace.ai",
+  ingestBaseUrl: "https://inject.obtrace.ai",
   tenantId: "tenant-dev",
   projectId: "project-dev",
   appId: "api",

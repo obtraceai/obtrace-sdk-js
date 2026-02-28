@@ -3,7 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2026-02-28"
 
 [vars]
-OBTRACE_INGEST_BASE_URL = "https://injet.obtrace.ai"
+OBTRACE_INGEST_BASE_URL = "https://inject.obtrace.ai"
 OBTRACE_TENANT_ID = "tenant-prod"
 OBTRACE_PROJECT_ID = "project-cf"
 OBTRACE_ENV = "production"

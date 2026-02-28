@@ -2,7 +2,7 @@ secret:
   apiKey: "REPLACE_WITH_SECRET_MANAGER_VALUE"
 
 config:
-  ingestBaseUrl: "https://injet.obtrace.ai"
+  ingestBaseUrl: "https://inject.obtrace.ai"
   tenantId: "tenant-prod"
   projectId: "project-prod"
   env: "production"
