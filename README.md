@@ -20,7 +20,7 @@ Browser SDK lives in `obtrace-sdk-browser`.
 ## Node/Bun Quickstart
 
 ```ts
-import { initNodeSDK } from "@obtrace/sdk-js/node";
+import { initNodeSDK, SemanticMetrics } from "@obtrace/sdk-js/node";
 
 const sdk = initNodeSDK({
   apiKey: process.env.OBTRACE_API_KEY!,
@@ -30,7 +30,23 @@ const sdk = initNodeSDK({
 });
 
 sdk.log("info", "service started");
+sdk.metric(SemanticMetrics.runtimeCpuUtilization, 0.42, "1", {
+  route: "/checkout",
+});
+sdk.span({
+  name: "checkout.charge",
+  attrs: {
+    "feature.name": "checkout",
+    "payment.provider": "stripe",
+  },
+});
 ```
+
+## Canonical metrics and custom spans
+
+- Use `SemanticMetrics` to emit metric names already normalized by the platform.
+- Keep custom application metrics on your own namespace only when they are truly product-specific.
+- Custom spans are created with `sdk.span({ name, attrs, statusCode, statusMessage })`.
 
 ## Backend wrappers
 
