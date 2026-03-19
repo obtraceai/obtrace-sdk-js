@@ -19,6 +19,24 @@ Browser SDK lives in `obtrace-sdk-browser`.
 
 ## Node/Bun Quickstart
 
+### Simplified setup
+
+The API key resolves `tenant_id`, `project_id`, `app_id`, and `env` automatically on the server side, so only three fields are needed:
+
+```ts
+import { initNodeSDK } from "@obtrace/sdk-js/node";
+
+const sdk = initNodeSDK({
+  apiKey: "obt_live_...",
+  ingestBaseUrl: "https://ingest.obtrace.io",
+  serviceName: "my-service",
+});
+```
+
+### Full configuration
+
+For advanced use cases you can override the resolved values explicitly:
+
 ```ts
 import { initNodeSDK, SemanticMetrics } from "@obtrace/sdk-js/node";
 
