@@ -12,9 +12,7 @@ export function randomHex(lenBytes: number): string {
   if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
     crypto.getRandomValues(out);
   } else {
-    for (let i = 0; i < lenBytes; i += 1) {
-      out[i] = Math.floor(Math.random() * 256);
-    }
+    throw new Error("crypto.getRandomValues is not available");
   }
   return hex(out);
 }

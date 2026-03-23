@@ -48,7 +48,13 @@ export function initNodeSDK(config: ObtraceSDKConfig): NodeSDK {
   };
 }
 
+let hooksInstalled = false;
+
 function installUnhandledHooks(client: ObtraceClient): void {
+  if (hooksInstalled) {
+    return;
+  }
+  hooksInstalled = true;
   const proc = (globalThis as {
     process?: {
       on: (event: string, cb: (arg: unknown) => void) => void;
