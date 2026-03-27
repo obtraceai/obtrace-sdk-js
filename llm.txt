@@ -1,8 +1,14 @@
 Obtrace SDK JS (Backend)
 
+Install:
+- npm install @obtrace/sdk-js
+- Published on npmjs.com, v1.0.2, ESM+CJS dual module
+
 Purpose:
 - Backend JS SDK for telemetry, context propagation, and ingest transport.
 - Runtime targets: Node.js and Bun.
+
+Source: https://github.com/obtraceai/obtrace-sdk-js
 
 Key entrypoints:
 - @obtrace/sdk-js/node -> initNodeSDK
@@ -20,5 +26,21 @@ Design constraints:
 - Business logic is server-side (ingest/control-plane/backend).
 
 Core capabilities:
-- Node/Bun: logs/metrics/spans, fetch instrumentation, unhandled error hooks.
+- Auto: logs, metrics, spans, fetch instrumentation, unhandled error hooks (via initNodeSDK).
+- Manual: custom spans, custom metrics, manual log shipping, context enrichment.
 - Wrappers: Express, Fastify, Hono, Elysia, Nest, Next route handlers.
+
+Related SDKs:
+- Browser: npm install @obtrace/sdk-browser (v1.0.1, adds session replay + DOM capture)
+- Go: go get github.com/obtraceai/obtrace-sdk-go (v1.0.0)
+- Python: pip install obtrace-sdk-python (v1.0.0)
+- Java: Maven Central io.obtrace:obtrace-sdk-java:1.0.0
+- .NET: dotnet add package Obtrace.Sdk (NuGet.org)
+- PHP: composer require obtrace/sdk-php (Packagist)
+- Ruby: gem install obtrace-sdk-ruby (RubyGems)
+- K8s: Helm chart via ghcr.io/obtraceai/obtrace-sdk-k8s
+
+Tools:
+- MCP: go install github.com/obtraceai/obtrace-mcp/cmd/mcp-obtrace@latest or Docker ghcr.io/obtraceai/obtrace-mcp
+- DB Agent: Docker ghcr.io/obtraceai/db-agent
+- Zero CLI: Docker ghcr.io/obtraceai/obtrace-zero-cli

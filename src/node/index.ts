@@ -36,7 +36,9 @@ export function initNodeSDK(config: ObtraceSDKConfig): NodeSDK {
   };
 
   installUnhandledHooks(client);
+  installConsoleHooks(client);
   const instrumented = instrumentServerFetch(client);
+  globalThis.fetch = instrumented;
 
   return {
     client,
@@ -46,6 +48,32 @@ export function initNodeSDK(config: ObtraceSDKConfig): NodeSDK {
     instrumentFetch: instrumented,
     shutdown: client.shutdown.bind(client)
   };
+}
+
+let consoleHooked = false;
+
+function installConsoleHooks(client: ObtraceClient): void {
+  if (consoleHooked) return;
+  consoleHooked = true;
+
+  const mapping: [keyof Console, LogLevel][] = [
+    ["debug", "debug"],
+    ["log", "info"],
+    ["info", "info"],
+    ["warn", "warn"],
+    ["error", "error"],
+  ];
+
+  for (const [method, level] of mapping) {
+    const original = console[method] as (...args: unknown[]) => void;
+    (console as unknown as Record<string, unknown>)[method] = (...args: unknown[]) => {
+      original.apply(console, args);
+      const message = args.map((a) => (typeof a === "string" ? a : JSON.stringify(a))).join(" ");
+      if (message && !message.startsWith("[obtrace]")) {
+        client.log(level, message);
+      }
+    };
+  }
 }
 
 let hooksInstalled = false;
