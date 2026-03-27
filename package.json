@@ -17,6 +17,11 @@
       "import": "./dist/node_entry.js"
     }
   },
+  "typesVersions": {
+    "*": {
+      "node": ["./dist/types/node_entry.d.ts"]
+    }
+  },
   "files": [
     "dist",
     "README.md"
