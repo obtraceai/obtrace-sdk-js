@@ -1,6 +1,6 @@
 {
   "name": "@obtrace/sdk-js",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Obtrace backend JavaScript SDK for Node.js and Bun",
   "type": "module",
   "license": "MIT",
@@ -10,16 +10,20 @@
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/cjs/index.cjs"
     },
     "./node": {
       "types": "./dist/types/node_entry.d.ts",
-      "import": "./dist/node_entry.js"
+      "import": "./dist/node_entry.js",
+      "require": "./dist/cjs/node_entry.cjs"
     }
   },
   "typesVersions": {
     "*": {
-      "node": ["./dist/types/node_entry.d.ts"]
+      "node": [
+        "./dist/types/node_entry.d.ts"
+      ]
     }
   },
   "files": [
@@ -27,7 +31,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json && node scripts/build-cjs.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node --import tsx --test test/*.test.ts"
   },
