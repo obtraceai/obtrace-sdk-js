@@ -1,5 +1,6 @@
 import { ObtraceClient } from "../core/client";
 import type { LogLevel, ObtraceSDKConfig, SDKContext } from "../shared/types";
+import { patchHTTP } from "./http_patch";
 import { instrumentServerFetch } from "./server_fetch";
 
 export interface NodeSDK {
@@ -37,6 +38,7 @@ export function initNodeSDK(config: ObtraceSDKConfig): NodeSDK {
 
   installUnhandledHooks(client);
   installConsoleHooks(client);
+  patchHTTP(client);
   const instrumented = instrumentServerFetch(client);
   globalThis.fetch = instrumented;
 
