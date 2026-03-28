@@ -84,7 +84,9 @@ export function setupOtel(config: ObtraceSDKConfig): OtelHandle {
       for (const inst of instrumentations) {
         inst.enable();
       }
-    } catch {}
+    } catch (err) {
+      console.warn("[obtrace] auto-instrumentation failed:", err);
+    }
   });
 
   const tracer = trace.getTracer("@obtrace/sdk-js", "1.1.2");

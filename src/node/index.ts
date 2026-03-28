@@ -7,11 +7,16 @@ export interface NodeSDK {
   log: (level: LogLevel, message: string, context?: SDKContext) => void;
   captureError: (error: unknown, context?: SDKContext) => void;
   metric: (name: string, value: number, unit?: string, context?: SDKContext) => void;
+  span: ObtraceClient["span"];
   instrumentFetch: typeof globalThis.fetch;
   shutdown: () => Promise<void>;
 }
 
+let _instance: NodeSDK | null = null;
+
 export function initNodeSDK(config: ObtraceSDKConfig): NodeSDK {
+  if (_instance) return _instance;
+
   const client = new ObtraceClient(config);
 
   const log = (level: LogLevel, message: string, ctx?: SDKContext) => {
@@ -33,14 +38,20 @@ export function initNodeSDK(config: ObtraceSDKConfig): NodeSDK {
 
   installUnhandledHooks(client);
 
-  return {
+  _instance = {
     client,
     log,
     captureError,
     metric: client.metric.bind(client),
+    span: client.span.bind(client),
     instrumentFetch: globalThis.fetch,
-    shutdown: client.shutdown.bind(client),
+    shutdown: async () => {
+      await client.shutdown();
+      _instance = null;
+    },
   };
+
+  return _instance;
 }
 
 let hooksInstalled = false;
