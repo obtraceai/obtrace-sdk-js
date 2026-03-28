@@ -37,7 +37,9 @@ export function initNodeSDK(config: ObtraceSDKConfig): NodeSDK {
   };
 
   installUnhandledHooks(client);
-  installConsoleHooks(client);
+  if (config.patchConsole !== false) {
+    installConsoleHooks(client);
+  }
   patchHTTP(client);
   const instrumented = instrumentServerFetch(client);
   globalThis.fetch = instrumented;
@@ -70,7 +72,36 @@ function installConsoleHooks(client: ObtraceClient): void {
     const original = console[method] as (...args: unknown[]) => void;
     (console as unknown as Record<string, unknown>)[method] = (...args: unknown[]) => {
       original.apply(console, args);
-      const message = args.map((a) => (typeof a === "string" ? a : JSON.stringify(a))).join(" ");
+      if (!args.length) return;
+      const first = args[0];
+      if (first !== null && typeof first === "object" && !Array.isArray(first) && !(first instanceof Error)) {
+        const structuredAttrs: Record<string, string | number | boolean> = {};
+        for (const [k, v] of Object.entries(first as Record<string, unknown>)) {
+          if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") {
+            structuredAttrs[k] = v;
+          } else if (v !== undefined && v !== null) {
+            structuredAttrs[k] = String(v);
+          }
+        }
+        const msg = typeof (first as Record<string, unknown>).msg === "string"
+          ? (first as Record<string, unknown>).msg as string
+          : typeof (first as Record<string, unknown>).message === "string"
+            ? (first as Record<string, unknown>).message as string
+            : JSON.stringify(first);
+        if (!msg.startsWith("[obtrace]")) {
+          client.log(level, msg, { attrs: structuredAttrs });
+        }
+        return;
+      }
+      const parts: string[] = [];
+      for (const a of args) {
+        if (typeof a === "string") {
+          parts.push(a);
+        } else {
+          parts.push(JSON.stringify(a));
+        }
+      }
+      const message = parts.join(" ");
       if (message && !message.startsWith("[obtrace]")) {
         client.log(level, message);
       }

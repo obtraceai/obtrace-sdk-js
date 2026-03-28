@@ -169,6 +169,7 @@ export class ObtraceClient {
   }
 
   instrumentedFetch(context?: { sessionId?: string }) {
+    const savedFetch = globalThis.fetch;
     return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
       const method = (init?.method ?? "GET").toUpperCase();
       const startMs = Date.now();
@@ -187,7 +188,7 @@ export class ObtraceClient {
             sessionId: context?.sessionId
           })
         };
-        const res = await fetch(input, merged);
+        const res = await savedFetch(input, merged);
         this.span({
           name: `http.client ${method}`,
           traceId,

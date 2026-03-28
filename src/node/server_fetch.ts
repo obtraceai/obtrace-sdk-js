@@ -2,7 +2,7 @@ import type { ObtraceClient } from "../core/client";
 import { extractPropagation, nowUnixNano, randomHex, sanitizeHeaders, toBase64 } from "../shared/utils";
 
 export function instrumentServerFetch(client: ObtraceClient): typeof fetch {
-  const baseFetch = globalThis.fetch.bind(globalThis);
+  const savedFetch = globalThis.fetch;
 
   return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const method = (init?.method ?? "GET").toUpperCase();
@@ -21,7 +21,7 @@ export function instrumentServerFetch(client: ObtraceClient): typeof fetch {
     });
 
     try {
-      const response = await baseFetch(input, {
+      const response = await savedFetch(input, {
         ...init,
         headers
       });

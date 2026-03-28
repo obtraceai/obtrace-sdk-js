@@ -1,8 +1,9 @@
 import type { ObtraceClient } from "../core/client";
-import { nowUnixNano, parseTraceparent, randomHex } from "../shared/utils";
+import { createTraceparent, nowUnixNano, parseTraceparent, randomHex } from "../shared/utils";
 
 type HttpModule = {
   createServer: (...args: unknown[]) => unknown;
+  request: (...args: unknown[]) => unknown;
   Server?: { prototype: { emit: (...args: unknown[]) => unknown } };
 };
 
@@ -16,6 +17,16 @@ type IncomingMessage = {
 type ServerResponse = {
   statusCode?: number;
   on?: (event: string, cb: () => void) => void;
+};
+
+type ClientRequest = {
+  method?: string;
+  path?: string;
+  protocol?: string;
+  host?: string;
+  getHeader?: (name: string) => string | string[] | number | undefined;
+  setHeader?: (name: string, value: string) => void;
+  on?: (event: string, cb: (...args: unknown[]) => void) => ClientRequest;
 };
 
 let patched = false;
@@ -34,11 +45,11 @@ export function patchHTTP(client: ObtraceClient): void {
     httpsMod = require("https") as HttpModule;
   } catch {}
 
-  if (httpMod) patchModule(httpMod, client);
-  if (httpsMod) patchModule(httpsMod, client);
+  if (httpMod) patchModule(httpMod, client, "http:");
+  if (httpsMod) patchModule(httpsMod, client, "https:");
 }
 
-function patchModule(mod: HttpModule, client: ObtraceClient): void {
+function patchModule(mod: HttpModule, client: ObtraceClient, protocol: string): void {
   if (mod.Server?.prototype) {
     const origEmit = mod.Server.prototype.emit;
     mod.Server.prototype.emit = function (...emitArgs: unknown[]) {
@@ -49,13 +60,112 @@ function patchModule(mod: HttpModule, client: ObtraceClient): void {
       return (origEmit as Function).apply(this, emitArgs);
     };
   }
+
+  const origRequest = mod.request as Function;
+  mod.request = function (...args: unknown[]) {
+    const options = normalizeRequestArgs(args);
+    const traceId = randomHex(16);
+    const spanId = randomHex(8);
+    const startMs = Date.now();
+    const startNs = nowUnixNano();
+
+    if (options && typeof options === "object") {
+      const opts = options as Record<string, unknown>;
+      if (!opts.headers) opts.headers = {};
+      const headers = opts.headers as Record<string, string>;
+      if (!headers["traceparent"]) {
+        headers["traceparent"] = createTraceparent(traceId, spanId);
+      }
+    }
+
+    const req = origRequest.apply(this, args) as ClientRequest;
+
+    const method = (req.method ?? "GET").toUpperCase();
+    const host = req.host ?? "unknown";
+    const path = req.path ?? "/";
+    const url = `${protocol}//${host}${path}`;
+
+    if (typeof req.on === "function") {
+      req.on("response", (res: unknown) => {
+        const incomingRes = res as { statusCode?: number; on?: (event: string, cb: () => void) => void };
+        const finish = () => {
+          const dur = Date.now() - startMs;
+          const statusCode = incomingRes.statusCode ?? 0;
+          client.span({
+            name: `http.client ${method}`,
+            traceId,
+            spanId,
+            startUnixNano: startNs,
+            endUnixNano: nowUnixNano(),
+            statusCode,
+            attrs: {
+              "http.method": method,
+              "http.url": url,
+              "http.status_code": statusCode,
+              "http.duration_ms": dur,
+            },
+          });
+          client.log(statusCode >= 400 ? "error" : "info", `outbound ${method} ${url} -> ${statusCode}`, {
+            traceId,
+            spanId,
+            method,
+            endpoint: url,
+            statusCode,
+            attrs: { duration_ms: dur },
+          });
+        };
+        if (typeof incomingRes.on === "function") {
+          incomingRes.on("end", finish);
+        } else {
+          finish();
+        }
+      });
+
+      req.on("error", (err: unknown) => {
+        const dur = Date.now() - startMs;
+        client.span({
+          name: `http.client ${method}`,
+          traceId,
+          spanId,
+          startUnixNano: startNs,
+          endUnixNano: nowUnixNano(),
+          statusCode: 500,
+          statusMessage: String(err),
+          attrs: {
+            "http.method": method,
+            "http.url": url,
+            "http.duration_ms": dur,
+          },
+        });
+        client.log("error", `outbound ${method} ${url} failed: ${String(err)}`, {
+          traceId,
+          spanId,
+          method,
+          endpoint: url,
+          attrs: { duration_ms: dur },
+        });
+      });
+    }
+
+    return req;
+  };
 }
 
-function wrapRequestListener(client: ObtraceClient, listener: (...args: unknown[]) => void) {
-  return (req: IncomingMessage, res: ServerResponse, ...rest: unknown[]) => {
-    instrumentRequest(client, req, res);
-    return listener(req, res, ...rest);
-  };
+function normalizeRequestArgs(args: unknown[]): unknown {
+  if (typeof args[0] === "string") {
+    try {
+      return new URL(args[0]);
+    } catch {
+      return args[0];
+    }
+  }
+  if (args[0] instanceof URL) {
+    return args[0];
+  }
+  if (args[0] && typeof args[0] === "object") {
+    return args[0];
+  }
+  return null;
 }
 
 function instrumentRequest(client: ObtraceClient, req: IncomingMessage, res: ServerResponse): void {
