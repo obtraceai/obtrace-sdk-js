@@ -18,6 +18,8 @@ export class ObtraceClient {
   private readonly meter: Meter;
   private readonly otelLogger: Logger;
   private readonly config: ObtraceSDKConfig;
+  private readonly gauges = new Map<string, ReturnType<Meter["createObservableGauge"]>>();
+  private readonly gaugeValues = new Map<string, { value: number; attrs: Record<string, string | number | boolean> }>();
 
   constructor(config: ObtraceSDKConfig) {
     if (!config.apiKey || !config.ingestBaseUrl || !config.serviceName) {
@@ -55,11 +57,17 @@ export class ObtraceClient {
   }
 
   metric(name: string, value: number, unit?: string, context?: SDKContext): void {
-    const gauge = this.meter.createObservableGauge(name, { unit: unit ?? "1" });
     const attrs = context?.attrs ?? {};
-    gauge.addCallback((result) => {
-      result.observe(value, attrs);
-    });
+    const key = `${name}:${unit ?? "1"}`;
+    this.gaugeValues.set(key, { value, attrs });
+    if (!this.gauges.has(key)) {
+      const gauge = this.meter.createObservableGauge(name, { unit: unit ?? "1" });
+      gauge.addCallback((result) => {
+        const current = this.gaugeValues.get(key);
+        if (current) result.observe(current.value, current.attrs);
+      });
+      this.gauges.set(key, gauge);
+    }
   }
 
   span(input: {

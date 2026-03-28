@@ -56,26 +56,36 @@ export function setupOtel(config: ObtraceSDKConfig): OtelHandle {
 
   const sdk = new NodeSDK({
     resource,
+    autoDetectResources: false,
     spanProcessor: new BatchSpanProcessor(traceExporter, {
       maxQueueSize: config.maxQueueSize ?? 1000,
+      maxExportBatchSize: 128,
       scheduledDelayMillis: config.flushIntervalMs ?? 2000,
     }),
     logRecordProcessor: new BatchLogRecordProcessor(logExporter, {
       maxQueueSize: config.maxQueueSize ?? 1000,
+      maxExportBatchSize: 128,
       scheduledDelayMillis: config.flushIntervalMs ?? 2000,
     }),
     metricReader: new PeriodicExportingMetricReader({
       exporter: metricExporter,
-      exportIntervalMillis: config.flushIntervalMs ?? 2000,
+      exportIntervalMillis: config.flushIntervalMs ?? 5000,
     }),
-    instrumentations: [
-      getNodeAutoInstrumentations({
-        "@opentelemetry/instrumentation-fs": { enabled: false },
-      }),
-    ],
+    instrumentations: [],
   });
 
   sdk.start();
+
+  setImmediate(() => {
+    try {
+      const instrumentations = getNodeAutoInstrumentations({
+        "@opentelemetry/instrumentation-fs": { enabled: false },
+      });
+      for (const inst of instrumentations) {
+        inst.enable();
+      }
+    } catch {}
+  });
 
   const tracer = trace.getTracer("@obtrace/sdk-js", "1.1.2");
   const meter = metrics.getMeter("@obtrace/sdk-js", "1.1.2");
