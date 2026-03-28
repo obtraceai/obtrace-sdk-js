@@ -85,20 +85,3 @@ export interface ReplayChunk {
   metadata?: Record<string, unknown>;
 }
 
-export interface HTTPRecord {
-  ts: number;
-  method: string;
-  url: string;
-  status?: number;
-  dur_ms?: number;
-  req_headers?: Record<string, string>;
-  res_headers?: Record<string, string>;
-  req_body_b64?: string;
-  res_body_b64?: string;
-}
-
-export interface QueuedPayload {
-  endpoint: string;
-  contentType: string;
-  body: string;
-}
