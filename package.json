@@ -1,6 +1,6 @@
 {
-  "name": "@obtrace/sdk-js",
-  "version": "1.2.0",
+  "name": "@obtrace/sdk",
+  "version": "1.0.0",
   "description": "Obtrace backend JavaScript SDK for Node.js and Bun",
   "type": "module",
   "license": "MIT",

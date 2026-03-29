@@ -49,8 +49,8 @@ export class ObtraceClient {
           Authorization: `Bearer ${this.config.apiKey}`,
         },
         body: JSON.stringify({
-          sdk: "obtrace-sdk-js",
-          sdk_version: "1.2.0",
+          sdk: "@obtrace/sdk",
+          sdk_version: "1.0.0",
           service_name: this.config.serviceName,
           service_version: this.config.serviceVersion ?? "",
           runtime: "node",
