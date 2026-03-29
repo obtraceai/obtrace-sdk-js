@@ -8,7 +8,7 @@ Install:
 
 Setup (must be first import in your app):
   import { initNodeSDK } from '@obtrace/sdk-js/node'
-  initNodeSDK({ apiKey: '...', ingestBaseUrl: '...', serviceName: 'my-api' })
+  initNodeSDK({ apiKey: '...', serviceName: 'my-api' })
 
 What it captures automatically:
 - HTTP requests (inbound + outbound)
@@ -19,7 +19,6 @@ What it captures automatically:
 
 Env vars:
   OBTRACE_API_KEY         — from app.obtrace.ai
-  OBTRACE_INGEST_BASE_URL — from app.obtrace.ai
   OBTRACE_SERVICE_NAME    — your service name (e.g. "api")
 
 Docs: https://docs.obtrace.ai/docs/sdks/node-bun

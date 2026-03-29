@@ -21,7 +21,7 @@ export interface OtelHandle {
 }
 
 export function setupOtel(config: ObtraceSDKConfig): OtelHandle {
-  const baseUrl = config.ingestBaseUrl.replace(/\/$/, "");
+  const baseUrl = (config.ingestBaseUrl || "https://ingest.obtrace.ai").replace(/\/$/, "");
   const authHeaders = {
     Authorization: `Bearer ${config.apiKey}`,
     ...(config.defaultHeaders ?? {}),

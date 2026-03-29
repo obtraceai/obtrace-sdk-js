@@ -23,9 +23,10 @@ export class ObtraceClient {
   private _initialized = false;
 
   constructor(config: ObtraceSDKConfig) {
-    if (!config.apiKey || !config.ingestBaseUrl || !config.serviceName) {
-      throw new Error("apiKey, ingestBaseUrl and serviceName are required");
+    if (!config.apiKey || !config.serviceName) {
+      throw new Error("apiKey and serviceName are required");
     }
+    config.ingestBaseUrl = config.ingestBaseUrl || "https://ingest.obtrace.ai";
     this.config = config;
     const handle = setupOtel(config);
     this.sdk = handle.sdk;
@@ -40,7 +41,7 @@ export class ObtraceClient {
   }
 
   private async handshake(): Promise<void> {
-    const base = this.config.ingestBaseUrl.replace(/\/$/, "");
+    const base = this.config.ingestBaseUrl!.replace(/\/$/, "");
     try {
       const res = await fetch(`${base}/v1/init`, {
         method: "POST",
