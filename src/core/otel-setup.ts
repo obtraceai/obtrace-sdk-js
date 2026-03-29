@@ -8,7 +8,8 @@ import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentation
 import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 import { BatchLogRecordProcessor } from "@opentelemetry/sdk-logs";
 import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
-import { trace, metrics, type Tracer, type Meter } from "@opentelemetry/api";
+import { trace, metrics, context, propagation, type Tracer, type Meter } from "@opentelemetry/api";
+import { W3CTraceContextPropagator } from "@opentelemetry/core";
 import { logs, type Logger } from "@opentelemetry/api-logs";
 import type { ObtraceSDKConfig } from "../shared/types";
 
@@ -74,6 +75,7 @@ export function setupOtel(config: ObtraceSDKConfig): OtelHandle {
     instrumentations: [],
   });
 
+  propagation.setGlobalPropagator(new W3CTraceContextPropagator());
   sdk.start();
 
   setImmediate(() => {
