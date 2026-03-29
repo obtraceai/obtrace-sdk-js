@@ -20,6 +20,7 @@ export class ObtraceClient {
   private readonly config: ObtraceSDKConfig;
   private readonly gauges = new Map<string, ReturnType<Meter["createObservableGauge"]>>();
   private readonly gaugeValues = new Map<string, { value: number; attrs: Record<string, string | number | boolean> }>();
+  private _initialized = false;
 
   constructor(config: ObtraceSDKConfig) {
     if (!config.apiKey || !config.ingestBaseUrl || !config.serviceName) {
@@ -31,6 +32,41 @@ export class ObtraceClient {
     this.tracer = handle.tracer;
     this.meter = handle.meter;
     this.otelLogger = handle.logger;
+    this.handshake();
+  }
+
+  get initialized(): boolean {
+    return this._initialized;
+  }
+
+  private async handshake(): Promise<void> {
+    const base = this.config.ingestBaseUrl.replace(/\/$/, "");
+    try {
+      const res = await fetch(`${base}/v1/init`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.config.apiKey}`,
+        },
+        body: JSON.stringify({
+          sdk: "obtrace-sdk-js",
+          sdk_version: "1.0.0",
+          service_name: this.config.serviceName,
+          service_version: this.config.serviceVersion ?? "",
+          runtime: "node",
+          runtime_version: typeof process !== "undefined" ? process.version : "",
+        }),
+        signal: AbortSignal.timeout(5000),
+      });
+      if (res.ok) {
+        this._initialized = true;
+        if (this.config.debug) console.log("[obtrace-sdk-js] init handshake OK");
+      } else {
+        console.error(`[obtrace-sdk-js] init handshake failed: ${res.status}`);
+      }
+    } catch (err) {
+      console.error("[obtrace-sdk-js] init handshake error:", err);
+    }
   }
 
   log(level: LogLevel, message: string, context?: SDKContext): void {
