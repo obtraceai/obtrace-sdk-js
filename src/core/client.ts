@@ -50,7 +50,7 @@ export class ObtraceClient {
         },
         body: JSON.stringify({
           sdk: "obtrace-sdk-js",
-          sdk_version: "1.0.1",
+          sdk_version: "1.0.2",
           service_name: this.config.serviceName,
           service_version: this.config.serviceVersion ?? "",
           runtime: "node",
