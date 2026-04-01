@@ -1,6 +1,6 @@
 {
   "name": "@obtrace/sdk",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "Obtrace backend JavaScript SDK for Node.js and Bun",
   "type": "module",
   "license": "MIT",
@@ -17,12 +17,20 @@
       "types": "./dist/types/node_entry.d.ts",
       "import": "./dist/node_entry.js",
       "require": "./dist/cjs/node_entry.cjs"
+    },
+    "./supabase": {
+      "types": "./dist/types/supabase_entry.d.ts",
+      "import": "./dist/supabase_entry.js",
+      "require": "./dist/cjs/supabase_entry.cjs"
     }
   },
   "typesVersions": {
     "*": {
       "node": [
         "./dist/types/node_entry.d.ts"
+      ],
+      "supabase": [
+        "./dist/types/supabase_entry.d.ts"
       ]
     }
   },
