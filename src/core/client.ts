@@ -1,4 +1,4 @@
-import { SpanStatusCode, type Tracer, type Meter, type Span } from "@opentelemetry/api";
+import { SpanStatusCode, TraceFlags, context as otelContext, trace, type Tracer, type Meter, type Span } from "@opentelemetry/api";
 import { SeverityNumber, type Logger } from "@opentelemetry/api-logs";
 import type { NodeSDK } from "@opentelemetry/sdk-node";
 import type { LogLevel, ObtraceSDKConfig, SDKContext } from "../shared/types";
@@ -118,9 +118,19 @@ export class ObtraceClient {
     statusMessage?: string;
     attrs?: Record<string, string | number | boolean>;
   }): { traceId: string; spanId: string } {
+    let parentCtx = otelContext.active();
+    if (input.traceId && input.parentSpanId) {
+      parentCtx = trace.setSpanContext(otelContext.active(), {
+        traceId: input.traceId,
+        spanId: input.parentSpanId,
+        traceFlags: TraceFlags.SAMPLED,
+        isRemote: true,
+      });
+    }
+
     const span = this.tracer.startSpan(input.name, {
       attributes: input.attrs,
-    });
+    }, parentCtx);
 
     if (typeof input.statusCode === "number" && input.statusCode >= 400) {
       span.setStatus({ code: SpanStatusCode.ERROR, message: input.statusMessage });

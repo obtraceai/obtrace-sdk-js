@@ -1,4 +1,5 @@
-import { SpanStatusCode } from "@opentelemetry/api";
+import { trace, context as otelContext, SpanStatusCode, TraceFlags } from "@opentelemetry/api";
+import { parseTraceparent } from "../../shared/utils";
 import type { ObtraceClient } from "../../core/client";
 
 export function elysiaObtracePlugin(client: ObtraceClient) {
@@ -17,12 +18,25 @@ export function elysiaObtracePlugin(client: ObtraceClient) {
 
       const method = req.method ?? "GET";
       const url = new URL(req.url);
+
+      let parentCtx = otelContext.active();
+      const raw = req.headers.get("traceparent");
+      const parsed = parseTraceparent(raw);
+      if (parsed) {
+        parentCtx = trace.setSpanContext(parentCtx, {
+          traceId: parsed.traceId,
+          spanId: parsed.parentSpanId,
+          traceFlags: TraceFlags.SAMPLED,
+          isRemote: true,
+        });
+      }
+
       const span = tracer.startSpan(`elysia.request ${method}`, {
         attributes: {
           "http.method": method,
           "http.route": url.pathname,
         },
-      });
+      }, parentCtx);
       spanMap.set(req, span);
     });
 

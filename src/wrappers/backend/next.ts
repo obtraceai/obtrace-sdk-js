@@ -1,4 +1,5 @@
-import { SpanStatusCode } from "@opentelemetry/api";
+import { trace, context as otelContext, SpanStatusCode, TraceFlags } from "@opentelemetry/api";
+import { parseTraceparent } from "../../shared/utils";
 import type { ObtraceClient } from "../../core/client";
 
 export function withNextRouteHandler<T extends (req: Request) => Promise<Response> | Response>(client: ObtraceClient, handler: T): T {
@@ -8,12 +9,24 @@ export function withNextRouteHandler<T extends (req: Request) => Promise<Respons
     const method = req.method;
     const pathname = new URL(req.url).pathname;
 
+    let parentCtx = otelContext.active();
+    const raw = req.headers.get("traceparent");
+    const parsed = parseTraceparent(raw);
+    if (parsed) {
+      parentCtx = trace.setSpanContext(parentCtx, {
+        traceId: parsed.traceId,
+        spanId: parsed.parentSpanId,
+        traceFlags: TraceFlags.SAMPLED,
+        isRemote: true,
+      });
+    }
+
     return tracer.startActiveSpan(`next.request ${method}`, {
       attributes: {
         "http.method": method,
         "http.route": pathname,
       },
-    }, async (span) => {
+    }, parentCtx, async (span) => {
       try {
         const res = await handler(req);
         span.setAttribute("http.status_code", res.status);
